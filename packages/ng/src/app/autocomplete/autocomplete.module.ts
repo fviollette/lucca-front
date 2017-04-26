@@ -1,11 +1,18 @@
-import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AutocompleteComponent } from './autocomplete.component';
+import { LuAutocompleteComponent } from './autocomplete.component';
+import { NgModule } from '@angular/core';
 
 @NgModule({
-  imports: [
-    CommonModule
-  ],
-  declarations: [AutocompleteComponent]
+	imports: [
+		CommonModule
+	],
+	declarations: [
+		LuAutocompleteComponent,
+	],
+	exports: [
+		LuAutocompleteComponent,
+	]
 })
-export class AutocompleteModule { }
+export class LuAutocompleteModule {}
+
+export { LuAutocompleteComponent } from './autocomplete.component';

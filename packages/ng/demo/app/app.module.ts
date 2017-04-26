@@ -1,17 +1,17 @@
+import { AppComponent } from './app.component';
+import { AutocompleteModule } from './autocomplete/autocomplete.module';
 import { BrowserModule } from '@angular/platform-browser';
-import { NgModule } from '@angular/core';
+import { DemoLolModule } from './lol/lol.module';
 import { FormsModule } from '@angular/forms';
 import { HttpModule } from '@angular/http';
-
-import { AppComponent } from './app.component';
-
-import { DemoLolModule } from './lol/lol.module';
+import { NgModule } from '@angular/core';
 
 @NgModule({
 	declarations: [
 		AppComponent,
 	],
 	imports: [
+		AutocompleteModule,
 		DemoLolModule,
 		BrowserModule,
 		FormsModule,
