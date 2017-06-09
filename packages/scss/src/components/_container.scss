@@ -37,7 +37,7 @@
 			}
 		}
 
-		@media (max-width: _theme("breakpoints.sm.breakAt")) {
+		@media (max-width: _component("container.min-width")) {
 			width: calc(100% - _theme("component.navSide.width"));
 		}
 	}
