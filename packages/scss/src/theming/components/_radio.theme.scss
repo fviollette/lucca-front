@@ -1,7 +1,0 @@
-$radio: (
-  // theming
-  default-palette: (
-    color:  _color("primary"),
-  ),
-);
-$theme: _set($theme, "components.radio", $radio);
