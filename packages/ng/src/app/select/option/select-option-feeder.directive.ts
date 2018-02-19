@@ -14,7 +14,7 @@ import {ISelectOptionFeeder} from './select-option-feeder.model';
 export class LuOptionFeederDirective<T> {
 
 
-	private _selectOptionFeeder: ISelectOptionFeeder<T>;
+	_selectOptionFeeder: ISelectOptionFeeder<T>;
 	constructor(
 		protected _viewContainerRef: ViewContainerRef,
 	) {

@@ -10,6 +10,7 @@ import {
 	EventEmitter,
 	OnDestroy,
 	QueryList,
+	ChangeDetectorRef,
 	ElementRef,
 } from '@angular/core';
 import { LuPopoverComponent, transformPopover, PopoverTriggerEvent } from '../../popover';
@@ -30,7 +31,7 @@ import {switchMap} from 'rxjs/operators/switchMap';
 import {startWith} from 'rxjs/operators/startWith';
 import {takeUntil} from 'rxjs/operators/takeUntil';
 import { standardSelectTemplate } from './select.template';
-import {LuSelectOption, LuSelectOptionSelectionChange, ISelectOptionFeeder, AbstractSelectOptionFeederComponent} from '../option';
+import {LuSelectOption, LuSelectOptionSelectionChange, ISelectOptionFeeder, LuOptionFeederDirective} from '../option';
 
 
 /**
@@ -71,7 +72,11 @@ export class LuSelectPicker<T> extends LuPopoverComponent implements AfterConten
 	/** All of the defined select options. */
 	@ContentChildren(LuSelectOption, { descendants: true })
 	private _luOptions: QueryList<LuSelectOption<T>> = new QueryList<LuSelectOption<T>>();
-	@ContentChild(AbstractSelectOptionFeederComponent) optionFeeder: ISelectOptionFeeder<T>;
+	private _optionFeeder: ISelectOptionFeeder<T>;
+	@ContentChild(LuOptionFeederDirective) optionFeederDirective: LuOptionFeederDirective<T>;
+	/** All of the defined select options. */
+	@ContentChildren(LuOptionFeederDirective, { descendants: true })
+	private _luOptionsFeederDirectives: QueryList<LuOptionFeederDirective<T>> = new QueryList<LuOptionFeederDirective<T>>();
 	/** Observable of the LuSelectOption, contained in the popover  */
 	luOptions$ = new BehaviorSubject<LuSelectOption<T>[]>([]);
 
@@ -89,6 +94,7 @@ export class LuSelectPicker<T> extends LuPopoverComponent implements AfterConten
 	constructor(
 		protected _elementRef: ElementRef,
 		private _ngZone: NgZone,
+		private _changeDetector: ChangeDetectorRef,
 	) {
 		super(_elementRef);
 		this.triggerEvent = 'none';
@@ -120,6 +126,18 @@ export class LuSelectPicker<T> extends LuPopoverComponent implements AfterConten
 			}
 		});
 	}
+
+	refreshDetector(){
+		this._changeDetector.markForCheck();
+		console.log('RefreshDetector %O', this.optionFeederDirective);
+		console.log('optionQueryList', this._luOptionsFeederDirectives);
+		this._luOptionsFeederDirectives.notifyOnChanges();
+		setTimeout(()=>{
+			console.log('RefreshDetector After timeout %O', this.optionFeederDirective);
+			console.log('optionQueryList', this._luOptionsFeederDirectives);
+
+		},500);
+	}
 	ngOnDestroy() {
 		this._highlightedOptionSub.unsubscribe();
 		this._destroy$.next();
@@ -142,14 +160,23 @@ export class LuSelectPicker<T> extends LuPopoverComponent implements AfterConten
 			});
 		});
 
-		Promise.resolve().then(()=>{
-			if (this.optionFeeder){
-				this.optionFeeder.subscribe((value: T) => {
-					this._luOptions.setDirty();
-					this._luOptions.notifyOnChanges();
-				});
-			}
-		})
+		console.log('optionQueryList', this._luOptionsFeederDirectives);
+
+		if (this.optionFeederDirective){
+			this._optionFeeder = this.optionFeederDirective._selectOptionFeeder;
+			this._optionFeeder.subscribe((value: T) => {
+				this._luOptions.setDirty();
+				this._luOptions.notifyOnChanges();
+			});
+		}
+
+		setTimeout(() => {
+			console.log(this.optionFeederDirective);
+			this._changeDetector.markForCheck();
+			//this._changeDetector.checkNoChanges();
+			console.log(this.optionFeederDirective);
+			console.log('optionQueryList', this._luOptionsFeederDirectives);
+		},1000);
 	}
 
 

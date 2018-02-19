@@ -40,6 +40,7 @@ extends LuPopoverTrigger {
 	/** Open the popover linked to the directive */
 	openPopover(): void {
 		super.openPopover();
+		this.popover.refreshDetector();
 		this._subscribeToBackdrop();
 	}
 	protected _getOverlayConfig(): OverlayConfig {

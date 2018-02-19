@@ -1,6 +1,8 @@
 import {
 	Component,
 	forwardRef,
+	OnInit,
+	AfterContentInit,
 } from '@angular/core';
 import { AbstractSelectOptionFeederComponent } from '../../../../src/app/select/option/select-option-feeder.component';
 
@@ -11,13 +13,22 @@ import { AbstractSelectOptionFeederComponent } from '../../../../src/app/select/
 /**
  * Component that manage the possibility to search in the options of a select.
  */
-export class FakeSelectFeeder extends AbstractSelectOptionFeederComponent<any> {
+export class FakeSelectFeeder extends AbstractSelectOptionFeederComponent<any> implements OnInit, AfterContentInit {
 
+	ngAfterContentInit(): void {
+		this.options = [
+			{ id: 1, name: 'red' },
+			{ id: 2, name: 'green' },
+			{ id: 3, name: 'yellow' },
+			{ id: 4, name: 'blue' },
+		];
+	}
 	private options = [];
 
 	constructor() {
 		super();
-		setTimeout(() => {
+
+		/* setTimeout(() => {
 
 
 			this.options = [
@@ -26,8 +37,13 @@ export class FakeSelectFeeder extends AbstractSelectOptionFeederComponent<any> {
 				{ id: 3, name: 'yellow' },
 				{ id: 4, name: 'blue' },
 			];
-			this.emit(null);
-		}, 2000);
+			// this.emit(null);
+		}, 2000);*/
+	}
+
+	ngOnInit(): void {
+		super.ngOnInit();
+
 	}
 
 }

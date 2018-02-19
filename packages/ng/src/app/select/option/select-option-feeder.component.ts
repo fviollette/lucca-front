@@ -1,5 +1,6 @@
 import {
 	Component,
+	OnInit,
 } from '@angular/core';
 import {ISelectOptionFeeder} from './select-option-feeder.model';
 
@@ -9,10 +10,14 @@ import {ISelectOptionFeeder} from './select-option-feeder.model';
 @Component({
 	template: '',
 })
-export class AbstractSelectOptionFeederComponent<T> implements ISelectOptionFeeder<T> {
+export class AbstractSelectOptionFeederComponent<T> implements ISelectOptionFeeder<T>, OnInit {
 
+	ngOnInit(): void {
+		console.log('AbstractSelectOptionFeederComponent.OnInit');
+	}
 	_emitter: (T) => void;
 	subscribe(next: (T: any) => void) {
+		console.log('AbstractSelectOptionFeederComponent.subscribe');
 		this._emitter = next;
 	}
 	/**
@@ -23,6 +28,7 @@ export class AbstractSelectOptionFeederComponent<T> implements ISelectOptionFeed
 	}
 
 	emit(value: T): void{
+		console.log('AbstractSelectOptionFeederComponent.emit');
 		this._emitter(value);
 	}
 

@@ -38,7 +38,7 @@ import {LuSelectOption} from './option/select-option.component';
 import { ISelectClearer } from './clearer/select-clearer.model';
 import { LuSelectClearerComponent } from './clearer/select-clearer.component';
 import { ISelectOptionFeeder } from './option/select-option-feeder.model';
-import { AbstractSelectOptionFeederComponent } from './option/select-option-feeder.component';
+import { LuOptionFeederDirective } from './option/select-option-feeder.directive';
 
 /** KeyCode for End Key */
 const END = 'End';
@@ -134,7 +134,8 @@ implements ControlValueAccessor, AfterContentInit, OnInit, OnDestroy {
 	/** Define the graphical mod apply to the component : 'mod-material' / 'mod-compact' / classic (without mod) */
 	@Input() mod: string;
 	@ContentChild(LuSelectClearerComponent) clearer: ISelectClearer<T>;
-	@ContentChild(AbstractSelectOptionFeederComponent) optionFeeder: ISelectOptionFeeder<T>;
+	private _optionFeeder: ISelectOptionFeeder<T>;
+	@ContentChild(LuOptionFeederDirective) optionFeederDirective: LuOptionFeederDirective<T>;
 
 	@HostBinding('class.is-filled') isFilled = false;
 
@@ -177,6 +178,10 @@ implements ControlValueAccessor, AfterContentInit, OnInit, OnDestroy {
 				this._picker.luOptions$.next(this.luOptions.toArray());
 			}
 		});
+
+		if (this.optionFeederDirective){
+			this._optionFeeder = this.optionFeederDirective._selectOptionFeeder;
+		}
 
 		Promise.resolve().then(() => {
 			if (this.clearer) {
@@ -273,7 +278,7 @@ implements ControlValueAccessor, AfterContentInit, OnInit, OnDestroy {
 	@HostListener('blur', ['$event'])
 	blur(e) {
 		this._onTouched();
-		if (this.optionFeeder && this.optionFeeder.hasFocus()) {
+		if (this._optionFeeder && this._optionFeeder.hasFocus()) {
 			return;
 		}
 		this._field.closePopover();

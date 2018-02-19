@@ -1,10 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 @Component({
 	selector: 'demo-searcher-select',
 	templateUrl: './searcher-select.component.html',
 })
-export class DemoSearcherSelectComponent {
-	colorOptions = [
+export class DemoSearcherSelectComponent implements OnInit {
+	colorOptionsTemp = [
 		{ name: 'aliceblue', code: '#f0f8ff'},
 		{ name: 'antiquewhite', code: '#faebd7'},
 		{ name: 'aqua', code: '#00ffff'},
@@ -156,4 +156,12 @@ export class DemoSearcherSelectComponent {
 	];
 	colorSelect = { name: 'red', code: '#ff0000'};
 
+	colorOptions = [];
+		ngOnInit(): void {
+		const optionsTmp = [];
+		setTimeout(() => {
+
+			this.colorOptions = this.colorOptionsTemp;
+		}, 1000);
+	}
 }
