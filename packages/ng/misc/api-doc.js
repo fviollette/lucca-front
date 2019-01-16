@@ -73,7 +73,7 @@ class APIDocVisitor {
     var className = interfaceDeclaration.name.text;
     var members = this.visitMembers(interfaceDeclaration.members);
 
-    return [{fileName, className, description, methods: members.methods, properties: members.properties}];
+    return [{fileName, name: className,  className, description, methods: members.methods, properties: members.properties}];
   }
 
   visitClassDeclaration(fileName, classDeclaration) {
@@ -92,6 +92,7 @@ class APIDocVisitor {
 
           return [{
             fileName,
+            name: className,
             className,
             description,
             selector: directiveInfo.selector,
@@ -111,6 +112,7 @@ class APIDocVisitor {
 
           return [{
             fileName,
+            name: className,
             className,
             description,
             pipeName: pipeInfo.name,
@@ -145,6 +147,7 @@ class APIDocVisitor {
               return [{
                 fileName,
                 className,
+                name: className,
                 declarations: declarationsElements,
                 exports: exportsElements
               }]
@@ -249,7 +252,7 @@ class APIDocVisitor {
   }
 
   visitArgument(arg) {
-    return { name: arg.name.text, type: this.visitType(arg) }
+    return { name: arg.name.text, type: this.visitType(arg), defaultValue: arg.initializer ? this.stringifyDefaultValue(arg.initializer) : undefined }
   }
 
   visitInput(property, inDecorator) {
