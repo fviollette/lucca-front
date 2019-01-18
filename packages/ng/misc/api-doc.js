@@ -39,6 +39,9 @@ function isPrivate(member, checker) {
   || (ts.getCombinedModifierFlags(member) & ts.ModifierFlags.Protected) !== 0
   || member.name.text.startsWith('_');
 }
+function isAbstract(member, checker) {
+  return (ts.getCombinedModifierFlags(member) & ts.ModifierFlags.Abstract) !==0;
+}
 
 function isPrivateOrInternal(member, checker) {
   return isPrivate(member, checker) || hasNoJSDoc(member, checker) || isInternalMember(member, checker);
@@ -156,10 +159,10 @@ class APIDocVisitor {
           }
         }
       }
-    } else if (description) {
+    } else {
       members = this.visitMembers(classDeclaration.members);
-
-      return [{fileName, className, description, methods: members.methods, properties: members.properties}];
+      const abstract = isAbstract(classDeclaration, this.program.getTypeChecker());
+      return [{fileName, className, abstract, description, methods: members.methods, properties: members.properties}];
     }
 
     // a class that is not a directive, a service or a pipe, not documented for now
