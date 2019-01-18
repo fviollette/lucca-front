@@ -36,7 +36,8 @@ function isAngularLifecycleHook(methodName) {
 
 function isPrivate(member, checker) {
   return (ts.getCombinedModifierFlags(member) & ts.ModifierFlags.Private) !== 0
-  || (ts.getCombinedModifierFlags(member) & ts.ModifierFlags.Protected) !== 0;
+  || (ts.getCombinedModifierFlags(member) & ts.ModifierFlags.Protected) !== 0
+  || member.name.text.startsWith('_');
 }
 
 function isPrivateOrInternal(member, checker) {
@@ -102,10 +103,10 @@ class APIDocVisitor {
             properties: members.properties,
             methods: members.methods
           }];
-        } else if (this.isServiceDecorator(classDeclaration.decorators[i])) {
+        } else if (this.isInjectable(classDeclaration.decorators[i])) {
           members = this.visitMembers(classDeclaration.members);
 
-          return [{fileName, className, description, methods: members.methods, properties: members.properties}];
+          return [{ type: 'injectable', fileName, className, description, methods: members.methods, properties: members.properties}];
         } else if (this.isPipeDecorator(classDeclaration.decorators[i])) {
           pipeInfo = this.visitPipeDecorator(classDeclaration.decorators[i]);
           members = this.visitPipeMembers(classDeclaration.members);
@@ -117,7 +118,7 @@ class APIDocVisitor {
             description,
             pipeName: pipeInfo.name,
             input: members.input,
-            args: members.args,
+            arguments: members.args,
             inputs: [],
             outputs: [],
             methods: [],
@@ -246,7 +247,7 @@ class APIDocVisitor {
   visitMethodDeclaration(method) {
     return {
       name: method.name.text, description: ts.displayPartsToString(method.symbol.getDocumentationComment(this.program.getTypeChecker())),
-          args: method.parameters ? method.parameters.map((prop) => this.visitArgument(prop)) : [],
+          arguments: method.parameters ? method.parameters.map((prop) => this.visitArgument(prop)) : [],
           returnType: this.visitType(method.type)
     }
   }
@@ -287,7 +288,7 @@ class APIDocVisitor {
     return {
       name: property.name.text,
       defaultValue: property.initializer ? this.stringifyDefaultValue(property.initializer) : undefined,
-      type: this.visitType(property),
+      propertyType: this.visitType(property),
       description: ts.displayPartsToString(property.symbol.getDocumentationComment(this.program.getTypeChecker()))
     };
   }
@@ -299,7 +300,7 @@ class APIDocVisitor {
     return decoratorIdentifierText === 'Directive' || decoratorIdentifierText === 'Component';
   }
 
-  isServiceDecorator(decorator) { return decorator.expression.expression.text === 'Injectable'; }
+  isInjectable(decorator) { return decorator.expression.expression.text === 'Injectable'; }
 
   isPipeDecorator(decorator) { return decorator.expression.expression.text === 'Pipe'; }
 
