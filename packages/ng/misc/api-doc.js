@@ -77,7 +77,7 @@ class APIDocVisitor {
     var className = interfaceDeclaration.name.text;
     var members = this.visitMembers(interfaceDeclaration.members);
 
-    return [{fileName, name: className,  className, description, methods: members.methods, properties: members.properties}];
+    return [{fileName, type: 'interface', name: className,  className, description, methods: members.methods, properties: members.properties}];
   }
 
   visitClassDeclaration(fileName, classDeclaration) {
@@ -90,13 +90,14 @@ class APIDocVisitor {
 
     if (classDeclaration.decorators) {
       for (var i = 0; i < classDeclaration.decorators.length; i++) {
-        if (this.isDirectiveDecorator(classDeclaration.decorators[i])) {
+        if (this.isDirectiveDecorator(classDeclaration.decorators[i]) || this.isComponentDecorator(classDeclaration.decorators[i])) {
           directiveInfo = this.visitDirectiveDecorator(classDeclaration.decorators[i]);
           members = this.visitMembers(classDeclaration.members);
 
           return [{
             fileName,
             name: className,
+            type: this.isDirectiveDecorator(classDeclaration.decorators[i]) ? 'directive' : 'component',
             className,
             description,
             selector: directiveInfo.selector,
@@ -109,7 +110,7 @@ class APIDocVisitor {
         } else if (this.isInjectable(classDeclaration.decorators[i])) {
           members = this.visitMembers(classDeclaration.members);
 
-          return [{ type: 'injectable', fileName, className, description, methods: members.methods, properties: members.properties}];
+          return [{ type: 'injectable', name: className, fileName, className, description, methods: members.methods, properties: members.properties}];
         } else if (this.isPipeDecorator(classDeclaration.decorators[i])) {
           pipeInfo = this.visitPipeDecorator(classDeclaration.decorators[i]);
           members = this.visitPipeMembers(classDeclaration.members);
@@ -119,6 +120,7 @@ class APIDocVisitor {
             name: className,
             className,
             description,
+            type: 'pipe',
             pipeName: pipeInfo.name,
             input: members.input,
             arguments: members.args,
@@ -139,17 +141,18 @@ class APIDocVisitor {
             decorator.expression.getChildren()[2].getChildren()[0].properties.forEach((properties) => {
               if (properties.symbol.getName() === "declarations") {
                 properties.initializer.elements.forEach(elementDeclaration => {
-                  declarationsElements.push(elementDeclaration.getFullText());
+                  declarationsElements.push(elementDeclaration.escapedText);
                 })
               } else if (properties.symbol.getName() === "exports") {
                 properties.initializer.elements.forEach(elementDeclaration => {
-                  exportsElements.push(elementDeclaration.getFullText().trim());
+                  exportsElements.push(elementDeclaration.escapedText.trim());
                 })
               }
             });
             if (declarationsElements.length > 0 || exportsElements.length > 0){
               return [{
                 fileName,
+                type: 'module',
                 className,
                 name: className,
                 declarations: declarationsElements,
@@ -162,7 +165,7 @@ class APIDocVisitor {
     } else {
       members = this.visitMembers(classDeclaration.members);
       const abstract = isAbstract(classDeclaration, this.program.getTypeChecker());
-      return [{fileName, className, abstract, description, methods: members.methods, properties: members.properties}];
+      return [{fileName, type: 'class', name: className, className, abstract, description, methods: members.methods, properties: members.properties}];
     }
 
     // a class that is not a directive, a service or a pipe, not documented for now
@@ -264,7 +267,7 @@ class APIDocVisitor {
     return {
       name: inArgs.length ? inArgs[0].text : property.name.text,
       defaultValue: property.initializer ? this.stringifyDefaultValue(property.initializer) : undefined,
-      type: this.visitType(property),
+      propertyType: this.visitType(property),
       description: ts.displayPartsToString(property.symbol.getDocumentationComment(this.program.getTypeChecker()))
     };
   }
@@ -283,6 +286,7 @@ class APIDocVisitor {
     var outArgs = outDecorator.expression.arguments;
     return {
       name: outArgs.length ? outArgs[0].text : property.name.text,
+      propertyType: this.visitType(property),
       description: ts.displayPartsToString(property.symbol.getDocumentationComment(this.program.getTypeChecker()))
     };
   }
@@ -300,7 +304,11 @@ class APIDocVisitor {
 
   isDirectiveDecorator(decorator) {
     var decoratorIdentifierText = decorator.expression.expression.text;
-    return decoratorIdentifierText === 'Directive' || decoratorIdentifierText === 'Component';
+    return decoratorIdentifierText === 'Directive';
+  }
+  isComponentDecorator(decorator) {
+    var decoratorIdentifierText = decorator.expression.expression.text;
+    return decoratorIdentifierText === 'Component';
   }
 
   isInjectable(decorator) { return decorator.expression.expression.text === 'Injectable'; }

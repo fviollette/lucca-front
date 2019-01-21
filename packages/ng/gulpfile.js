@@ -19,7 +19,7 @@ function getApiDocs() {
 }
 
 gulp.task('generatedoc', (cb) => {
-	const docs = `const API_DOCS = ${JSON.stringify(getApiDocs(), null, 2)};\n\nexport default API_DOCS;`;
+	const docs = `const NG_DOCS = ${JSON.stringify(getApiDocs(), null, 2)};\n\nexport default NG_DOCS;`;
 	fs.writeFile('docs/demo/api-docs.ts', docs, cb);
 });
 
